@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.6.10/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyC6dxpweB0VP-bWa9JRew-KZRhITSaqsDw",
+            authDomain: "live-booth.firebaseapp.com",
+            databaseURL: "https://live-booth.firebaseio.com",
+            storageBucket: "live-booth.appspot.com",
+            messagingSenderId: "545954547814"
+        };
+        firebase.initializeApp(config);
+    </script>
+
+    <!-- Firechat -->
+    <link rel="stylesheet" href="https://cdn.firebase.com/libs/firechat/3.0.1/firechat.min.css" />
+    <script src="https://cdn.firebase.com/libs/firechat/3.0.1/firechat.min.js"></script>
+</head>
+<body>
+<script>
+      function loginAnonymously() {
+        // Log the user in via Anonymously
+        firebase.auth().signInAnonymously().catch(function(error) {
+          console.log("Error authenticating user:", error);
+        });
+      }
+
+      function loginWithEmailAndPassword(email, password) {
+        // Log the user in via Email & Password
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+          console.log("Error authenticating user:", error);
+        });
+      }
+
+      function logout() {
+        // Log the user out
+        firebase.auth().signOut().then(function() {
+          window.location.reload();
+        }, function(error) {
+          console.log("Error logout user:", error);
+        });
+      }
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        // Once authenticated, instantiate Firechat with the logged in user
+        if (user) {
+          initChat(user);
+        }
+      });
+
+      function initChat(user) {
+        // Get a Firebase Database ref
+        var chatRef = firebase.database().ref("chat");
+
+        // Create a Firechat instance
+        var chat = new FirechatUI(chatRef, document.getElementById("firechat-wrapper"));
+
+        // Set the Firechat user
+        if (user.displayName) {
+            displayName = user.displayName;
+        } else if (user.email) {
+            displayName = user.email + " (Agent)";
+        } else {
+            displayName = "Anonymous";
+        }
+        chat.setUser(user.uid, displayName);
+        $('#account-wrapper').show();
+      }
+
+      $(function() {
+        $('#account-wrapper').hide();
+      });
+    </script>
+
+<div id="firechat-wrapper">
+    <button onclick="loginWithEmailAndPassword('chris.lo@iproperty.com', 'abc123');">Login with Chris Lo (Agent)</button>
+    <button onclick="loginWithEmailAndPassword('fabio.lee@iproperty.com', 'abc123');">Login with Fabio Lee (Agent)</button>
+    <button onclick="loginWithEmailAndPassword('michael@iproperty.com', 'abc123');">Login with Michael Foong (Agent)</button>
+    <button onclick="loginWithEmailAndPassword('raghuram.kumar@iproperty.com', 'abc123');">Login with Raghuram Kumar Pothana (Agent)</button>
+</div>
+<div id="account-wrapper">
+    <button onclick="logout();">Logout</button>
+</div>
+</body>
+</html>
